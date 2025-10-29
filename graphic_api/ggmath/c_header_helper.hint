@@ -1,0 +1,7 @@
+#ifdef __cplusplus
+#define _EXTERN_C_BEGIN_ extern "C" {
+#define _EXTERN_C_END_   }
+#else
+#define _EXTERN_C_BEGIN_
+#define _EXTERN_C_END_
+#endif
