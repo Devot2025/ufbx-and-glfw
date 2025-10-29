@@ -9,11 +9,9 @@ find_package(glfw3 REQUIRED)
 
 
 include_directories("base_lib/glad/include")
-include_directories("${FBX_SDK_LIB_PATH}/include")
 include_directories("base_lib/")
 include_directories("graphic_api/")
 add_library(glad STATIC "base_lib/glad/src/glad.c")
-link_directories("${FBX_SDK_LIB_PATH}/lib/debug")
 add_executable("main.out"
     "main.cpp"
     "base_lib/ufbx/ufbx.c"
@@ -23,5 +21,4 @@ add_executable("main.out"
     "graphic_contents_main.cpp"
     "graphic_api/ggmath/sgg_vec.c"
 )
-
 target_link_libraries("main.out" PRIVATE glad glfw OpenGL::GL OpenGL::GLU m)
