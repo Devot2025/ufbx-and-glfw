@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "glsys.hint"
+
 class Basic_Shader_Loader{
     public:
     GLuint build_shader_program(GLuint *shader_ids, GLuint src_num);

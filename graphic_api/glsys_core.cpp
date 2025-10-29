@@ -1,4 +1,13 @@
 #include "glsys_core.hpp"
+
+
+Program_Shader_Operator::Program_Shader_Operator(const char * vert_file_path,const char * frag_file_path,  GLuint shader_var_num) : program_shader_manager(vert_file_path, frag_file_path){
+    prog_shader_var_ids.resize(shader_var_num);
+}
+void Program_Shader_Operator::register_shader_var_name_id(GLuint shader_var_name_id, const char * shader_var_name){
+    prog_shader_var_ids[shader_var_name_id] = glGetUniformLocation(program_shader_manager.prog_shader, shader_var_name);
+}
+
 GLFW_Manager::GLFW_Manager(int width, int height, const char * name){
     if(!name) name = "exapmle gl";
     if(!glfwInit()){
@@ -26,18 +35,18 @@ void GLFW_Manager::glfw_require_process(){
 
 
 
-Gl_Sys_Main_Manager::Gl_Sys_Main_Manager(int width, int height, const char * name) : glfw_manage(width, height, name){
+GL_Sys_Main_Manager::GL_Sys_Main_Manager(int width, int height, const char * name) : glfw_manage(width, height, name){
     glfw_manage.ini_gl_core();
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) throw std::runtime_error("error : failed to load glad");
     
 }
-Gl_Sys_Main_Manager::~Gl_Sys_Main_Manager(){
+GL_Sys_Main_Manager::~GL_Sys_Main_Manager(){
     glfwTerminate();
 }
 
 
 
-int Gl_Sys_Main_Manager::run_gl_loop(GL_Loop_Manager & loop_manager){
+int GL_Sys_Main_Manager::run_gl_loop(GL_Loop_Manager & loop_manager){
     loop_manager.glfw_sub_manager.set_glfw_manager(glfw_manage);
     
     if(!loop_manager.init_loop())return -1;
