@@ -1,60 +1,9 @@
 #include "graphic_contents_main.hpp"
-unsigned int gVAO = 0, gVBO = 0, gEBO = 0;
-void create_simple_cube_mesh() {
-    float vertices[] = {
-        // pos             // normal          // uv
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f
-    };
-
-    unsigned int indices[] = {
-        0,1,2, 2,3,0,  // back
-        4,5,6, 6,7,4,  // front
-        0,1,5, 5,4,0,  // bottom
-        2,3,7, 7,6,2,  // top
-        0,3,7, 7,4,0,  // left
-        1,2,6, 6,5,1   // right
-    };
-
-    glGenVertexArrays(1, &gVAO);
-    glGenBuffers(1, &gVBO);
-    glGenBuffers(1, &gEBO);
-
-    glBindVertexArray(gVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // pos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // uv
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glBindVertexArray(0);
-}
-
-void draw_simple_cube_mesh() {
-    glBindVertexArray(gVAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
-Test_Main_Loop::Test_Main_Loop() : main_shader_manager("shader/gl_shader.vert", "shader/gl_shader.frag",8){
+Test_Main_Loop::Test_Main_Loop() : main_shader_manager("shader/gl_shader.vert", "shader/gl_shader.frag", 8), emulated_bone(64){
     
 }
+GL_Mesh_Data_Root * a_mesh;
 int Test_Main_Loop::init_loop(){
     std::cout << "init loop call" << std::endl;
     test_light.color_manager(1.0f);
@@ -64,11 +13,14 @@ int Test_Main_Loop::init_loop(){
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_Projection, "projection");
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_View_Pos, "view");
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_Skin_Bones, "skin_bones");
+    
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_Light_Pos, "lightPos");
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_Light_Color, "lightColor");
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_Mesh_Color, "objectColor");
+    
     main_shader_manager.register_shader_var_name_id(E_Main_Shader_Static_Check, "static_check");
-    create_simple_cube_mesh();
+    a_mesh = change_fbx_to_gl_mesh_style("a.fbx", 1.0f);
+    
     
     return 1;
 }
@@ -90,11 +42,31 @@ int Test_Main_Loop::main_loop(){
 
     Basic_Camera3D_Manager<E_Main_Shader_View_Pos, E_Main_Shader_Projection>::up_load_perspective(main_shader_manager, 45.0f, 1600.0f / 900.0f, 0.05f, 200.0f);
     obj_color.use_obj_color(main_shader_manager);
-    test_light.color_manager.use_obj_color(main_shader_manager);
-    test_light.pos_manager.use_obj_pos(main_shader_manager);
-    use_static_check<E_Main_Shader_Static_Check>(main_shader_manager, 1);
+    test_light.use_light(main_shader_manager);
 
-    if(glfw_sub_manager.glfw_manager->gl_sys_push_key(GLFW_KEY_A)) std::cout << "hello world!" << std::endl;
-    draw_simple_cube_mesh();
+    use_static_check<E_Main_Shader_Static_Check>(main_shader_manager, 0);
+
+
+
+
+    /*render a_mesh*/
+    for(unsigned i = 0; i < a_mesh->meshes_size; ++i){
+        auto &ms = a_mesh->meshes_table[i];
+        for(unsigned j = 0; j < ms.parts_size; ++j){
+            std::vector<SGG_Mat4> gm;
+            /*upload skin bones*/
+            for(unsigned int u = 0; u < ms.bone_maps[j].bone_size; ++u){
+                GL_Node_Table * node = &a_mesh->nodes_table[ms.bone_maps[j].bone_indices[u]];
+                SGG_Mat4 new_mat;
+                mul_mat4_mat4(&new_mat, &node->node_to_world_deform, &ms.bone_maps[j].bone_mat4[u]);
+                gm.push_back(new_mat);
+            }
+            emulated_bone.start_emulated_u2d_data((void *)gm.data(), ms.bone_maps[j].bone_size, main_shader_manager);
+            
+            /*render mesh*/
+            glBindVertexArray(ms.mesh_parts[j].vao);
+            glDrawElements(GL_TRIANGLES, ms.mesh_parts[j].vtn, GL_UNSIGNED_INT, 0);
+        }
+    }
     return 1;
 }
