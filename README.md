@@ -1,5 +1,13 @@
 # ufbx-and-glfw
 This is a program that displays FBX files using ufbx, OpenGL, GLFW, and GLAD.
+## Version Information
+
+The following library versions were used in this project:
+
+- **GLFW:** 3.3.6  
+- **OpenGL:** 4.6 (Mesa 23.2.1)  
+- **GLAD:** Generated for OpenGL 4.6  
+- **ufbx:** Current latest version
 
 ## Known Limitations and Notes
 
