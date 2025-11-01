@@ -6,8 +6,8 @@ The following library versions were used in this project:
 
 - **GLFW:** 3.3.6  
 - **OpenGL:** 4.6 (Mesa 23.2.1)  
-- **GLAD:** Generated for OpenGL 4.6  
-- **ufbx:** Current latest version
+- **GLAD:** Generated for OpenGL 4.6 <https://glad.dav1d.de/>
+- **ufbx:** Current latest version <https://github.com/ufbx/ufbx.git>
 
 ## Known Limitations and Notes
 
