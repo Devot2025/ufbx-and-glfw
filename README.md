@@ -23,6 +23,10 @@ The following library versions were used in this project:
 The Autodesk FBX SDK could technically be used,  
 but it was avoided because it is relatively slow and difficult to work with.  
 Instead, this project uses **ufbx**, a lightweight and faster FBX loader.
+## Math Utilities
+
+ufbx provides some very useful math utilities, and in most cases it’s better to use them rather than re-implementing your own.  
+In this project, however, I already had existing math code, so I decided to integrate that instead.
 
 # Example test image
 ![Test Image](image/test_a_fbx_gl.png)
