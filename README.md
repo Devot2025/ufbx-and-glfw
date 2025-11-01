@@ -18,7 +18,11 @@ The following library versions were used in this project:
   - Bypass skinning updates when there are no active animations,
   - Add null checks for empty animation data.
 - **Shape Keys (Morph Targets):** Currently **unsupported**.
+## FBX SDK
 
+The Autodesk FBX SDK could technically be used,  
+but it was avoided because it is relatively slow and difficult to work with.  
+Instead, this project uses **ufbx**, a lightweight and faster FBX loader.
 
 # Example test image
 ![Test Image](image/test_a_fbx_gl.png)
