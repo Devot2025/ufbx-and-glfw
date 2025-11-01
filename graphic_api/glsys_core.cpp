@@ -7,7 +7,13 @@ Program_Shader_Operator::Program_Shader_Operator(const char * vert_file_path,con
 void Program_Shader_Operator::register_shader_var_name_id(GLuint shader_var_name_id, const char * shader_var_name){
     prog_shader_var_ids[shader_var_name_id] = glGetUniformLocation(program_shader_manager.prog_shader, shader_var_name);
 }
+Basic_Gl_Texture::Basic_Gl_Texture() : tex_id{}, tex_size{} {
 
+}
+void Basic_Gl_Texture::gen_gl_texture(){
+    glGenTextures(1, &tex_id);
+}
+Basic_Gl_Texture::~Basic_Gl_Texture(){glDeleteTextures(1, &tex_id);}
 GLFW_Manager::GLFW_Manager(int width, int height, const char * name){
     if(!name) name = "exapmle gl";
     if(!glfwInit()){

@@ -22,7 +22,7 @@ SGG_Vector3 & Object_Color_Manager<color_id>::operator()(float vec_a){
 }
 template <GLuint color_id>
 Object_Color_Manager<color_id>::Object_Color_Manager(){
-    assignment_vector3(&color, 0.0f);
+    assignment_vector3(&color, 1.0f);
 }
 template <GLuint color_id>
 void Object_Color_Manager<color_id>::use_obj_color(Program_Shader_Operator & prog_shader_ope){
@@ -66,6 +66,11 @@ class Object_Light_3D{
     public:
     Object_Pos_Manager<pos_id> pos_manager;
     Object_Color_Manager<color_id> color_manager;
+    void use_light(Program_Shader_Operator & prog_shader_ope);
 };
-
+template <GLuint color_id, GLuint pos_id>
+void Object_Light_3D<color_id, pos_id>::use_light(Program_Shader_Operator & prog_shader_ope){
+    pos_manager.use_obj_pos(prog_shader_ope);
+    color_manager.use_obj_color(prog_shader_ope);
+}
 #endif

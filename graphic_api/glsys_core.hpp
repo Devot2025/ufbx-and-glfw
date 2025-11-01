@@ -22,6 +22,85 @@ class Program_Shader_Operator{
     private:
     Basic_GL_Program_Shader_Manager program_shader_manager;
 };
+
+class Basic_Gl_Texture{
+	public:
+	GLuint tex_id;
+	int tex_size;
+	Basic_Gl_Texture();
+	~Basic_Gl_Texture();
+    void gen_gl_texture();
+	virtual inline void start_texture(){}
+    
+};
+template <GLuint u2d_id, int u2d_data_width = 4>
+class Emulate_Uniform_2D_Data : Basic_Gl_Texture{
+    public:
+    Emulate_Uniform_2D_Data(int ini_size);
+    void gen_emulated_u2d_data(int data_size);
+    bool start_emulated_u2d_data(void * emulated_u2d, int emulated_u2d_size, Program_Shader_Operator & prog_shader_ope);
+    bool start_emulated_u2d_data(void * emulated_u2d, Program_Shader_Operator & prog_shader_ope);
+    
+    private:
+    void booked_uniform_2_data(int data_size);
+    void standard_emulated_u2d_data_opt();
+};
+template <GLuint u2d_id, int u2d_data_width>
+void Emulate_Uniform_2D_Data<u2d_id, u2d_data_width>::gen_emulated_u2d_data(int data_size){
+    if(data_size <= 0)return;
+    if(!tex_id)glGenTextures(1, &tex_id);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    standard_emulated_u2d_data_opt();
+    booked_uniform_2_data(data_size);
+}
+
+template <GLuint u2d_id, int u2d_data_width>
+bool Emulate_Uniform_2D_Data<u2d_id, u2d_data_width>::start_emulated_u2d_data(void * emulated_u2d, int emulated_u2d_size, Program_Shader_Operator & prog_shader_ope){
+    if(!emulated_u2d)return false;
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    booked_uniform_2_data(emulated_u2d_size);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, u2d_data_width, tex_size, GL_RGBA, GL_FLOAT, emulated_u2d);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    constexpr int dummy_upload_data = 0;
+    prog_shader_ope.upload_shader_uniform_v1_data(u2d_id, dummy_upload_data);
+    return true;
+}
+
+template <GLuint u2d_id, int u2d_data_width>
+bool Emulate_Uniform_2D_Data<u2d_id, u2d_data_width>::start_emulated_u2d_data(void * emulated_u2d, Program_Shader_Operator & prog_shader_ope){
+    if(!emulated_u2d)return false;
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, u2d_data_width, tex_size, GL_RGBA, GL_FLOAT, emulated_u2d);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    constexpr int dummy_upload_data = 0;
+    prog_shader_ope.upload_shader_uniform_v1_data(u2d_id, dummy_upload_data);
+    return true;
+}
+template <GLuint u2d_id, int u2d_data_width>
+Emulate_Uniform_2D_Data<u2d_id, u2d_data_width>::Emulate_Uniform_2D_Data(int ini_size){
+    if(ini_size <= 0)ini_size = 64;
+    glGenTextures(1, &tex_id);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    standard_emulated_u2d_data_opt();
+    booked_uniform_2_data(ini_size);
+}
+template <GLuint u2d_id, int u2d_data_width>
+void Emulate_Uniform_2D_Data<u2d_id, u2d_data_width>::booked_uniform_2_data(int data_size){
+    if(tex_size == data_size) return;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, u2d_data_width, data_size, 0, GL_RGBA, GL_FLOAT, nullptr);
+    tex_size = data_size;   
+}
+template <GLuint u2d_id, int u2d_data_width>
+void Emulate_Uniform_2D_Data<u2d_id, u2d_data_width>::standard_emulated_u2d_data_opt(){
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+}
 class Basic_GLFW_Manager{
     protected:
     GLFWwindow * glwin = nullptr;

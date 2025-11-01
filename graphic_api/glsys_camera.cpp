@@ -31,7 +31,7 @@ void Basic_Camera3D_Control::mouse_camera_program(double mx, double my){
 }
 
 void Basic_Camera3D_Control::move_camera(Basic_GLFW_Manager & glfw_manager, float correction_value){
-    constexpr float dash_scalar = 2.5f;
+    constexpr float dash_scalar = 0.5f;
     float result_speed = speed;
     if(glfw_manager.gl_sys_push_key(GLFW_KEY_LEFT_CONTROL)) result_speed *= dash_scalar;
 
