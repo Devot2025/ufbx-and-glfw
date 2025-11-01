@@ -32,7 +32,7 @@ void main()
 
     // Specular
     float specularStrength = 0.5;
-    vec3 viewFaceDir = normalize(viewPos - vec3(f_worldPos));
+    vec3 viewFaceDir = normalize(0.0 - vec3(f_worldPos));
     vec3 incidentLDir = -lightFaceDir; 
     //Calculate the reflection direction
     vec3 reflectDir = reflect(incidentLDir, f_norm);

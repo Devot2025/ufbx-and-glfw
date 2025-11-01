@@ -1,9 +1,13 @@
+
 #version 330 core
+
+/*static bone array start*/
 #define BONE_NUM 128
 
 layout(std140) uniform skinVert {
     mat4 bones[BONE_NUM];
 };
+/*static bone array end*/
 
 uniform sampler2D skin_bones;
 
@@ -22,13 +26,13 @@ mat4 get_tex_apper_data_mat4(int index, int size, int base){
         get_tex_apper_unique_data(buf_index + 3)
     );
 }
-
 layout (location = 0) in vec3 a_pos;
 layout (location = 1) in vec3 t_normal;
 layout (location = 2) in vec2 t_uv;
 layout (location = 3) in float t_indices;
 layout (location = 4) in uvec4 boneInd;
 layout (location = 5) in vec4 boneWeight;
+uniform mat4 model;
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -52,22 +56,25 @@ mat4 get_skin_main(){
         + bones[boneInd.w] * boneWeight.w;
     }
 }
-
-
-void dynamic_object_vert_program(){
+void dynamic_mesh_program(){
 
     mat4 boneDef = get_skin_main();
-    f_worldPos = boneDef * vec4(a_pos, 1.0);
-    mat3 nmat = transpose(inverse(mat3(boneDef)));
+    
+    f_worldPos = (boneDef * vec4(a_pos, 1.0));
+    
+    mat3 nmat = mat3(transpose(inverse(boneDef)));
+    
     f_normal = normalize(nmat * t_normal);
+    
     gl_Position = projection * view * f_worldPos;
 }
-void static_object_vert_program(){
+void static_mesh_program(){
     f_worldPos = vec4(a_pos, 1.0);
     f_normal   = normalize(t_normal);
+    //f_uv       = t_uv;
     gl_Position = projection * view * f_worldPos;
 }
 void main() {
-    if (static_check == 0) dynamic_object_vert_program();
-    else static_object_vert_program();
+    if(static_check == 0)dynamic_mesh_program();
+    else static_mesh_program();
 }
